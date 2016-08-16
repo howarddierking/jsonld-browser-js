@@ -1,0 +1,26 @@
+{
+  "name": "jsonld-browser-js",
+  "version": "0.1.0",
+  "description": "Enables browsing of a JSON-LD graph, for both local and remote vertices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/howarddierking/jsonld-browser-js.git"
+  },
+  "keywords": [
+    "jsonld"
+  ],
+  "author": "Howard Dierking",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/howarddierking/jsonld-browser-js/issues"
+  },
+  "homepage": "https://github.com/howarddierking/jsonld-browser-js#readme",
+  "dependencies": {
+    "q": "^1.4.1",
+    "ramda": "^0.22.1"
+  }
+}
