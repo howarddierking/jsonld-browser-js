@@ -1,10 +1,5 @@
-// s -> Promise [a]
-let getResource = function(uri){
-  return Q($.getJSON(uri))
-  .then(doc => {
-    return jsonld.promises.expand(doc);
-  });
-};
+var R = require('ramda');
+var Q = require('q');
 
 // first :: [a] -> a | Undefined
 let first = R.nth(0);
@@ -12,20 +7,38 @@ let first = R.nth(0);
 // id :: Object -> String | Undefined
 let id = R.prop('@id');
 
+// defaultToEmptyString :: String -> String
+let defaultToEmptyString = R.defaultTo('');
 
-
-// s -> s -> s
-let localNameResolver = R.curry(function(namespace, localName){
-  return function(){ return R.concat(namespace, localName )};
+// localName :: String -> String -> String
+let localName = exports.localName = R.curry(function(namespace, name){
+  return R.concat(defaultToEmptyString(namespace), name);
 });
 
-// {s} -> s -> s
-let qnameResolver = R.curry(function(map){
-  // TODO
-  return undefined;
+// splitQName :: String -> [String]
+let splitQName = R.split(':');
+
+// qname :: Object -> String -> String
+let qname = exports.qname = R.curry(function(map, name){
+  return R.when(
+    a => {
+      return R.has(R.head(splitQName(a)), map);
+    },
+    a => {
+      let nameParts = splitQName(a);
+      return localName(R.prop(R.head(nameParts), map), R.join(':', R.tail(nameParts)));
+    },
+    name
+  );
 });
 
-
+// s -> Promise [a]
+let getResource = function(uri){
+  return Q($.getJSON(uri))
+  .then(doc => {
+    return jsonld.promises.expand(doc);
+  });
+};
 
 // {s: [a]} -> s -> Promise [a]
 let localProperty = function(obj, p){
