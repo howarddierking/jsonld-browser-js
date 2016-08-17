@@ -10,26 +10,41 @@ let id = R.prop('@id');
 // defaultToEmptyString :: String -> String
 let defaultToEmptyString = R.defaultTo('');
 
-// localName :: String -> String -> String
-let localName = exports.localName = R.curry(function(namespace, name){
+// expandRelativeIRI :: String -> String -> String
+let expandRelativeIRI = exports.expandRelativeIRI = R.curry(function(namespace, name){
   return R.concat(defaultToEmptyString(namespace), name);
 });
 
-// splitQName :: String -> [String]
-let splitQName = R.split(':');
+// splitCompactIRI :: String -> [String]
+let splitCompactIRI = R.split(':');
 
-// qname :: Object -> String -> String
-let qname = exports.qname = R.curry(function(map, name){
+// getCompactIRIPrefix :: String -> String
+let getCompactIRIPrefix = exports.getCompactIRIPrefix = R.pipe(splitCompactIRI, first);
+
+// getCompactIRISuffix :: String -> String
+let getCompactIRISuffix = exports.getCompactIRISuffix = R.pipe(splitCompactIRI, R.nth(1));
+
+let canExpandCompactIRI = exports.canExpandCompactIRI = R.curry(function(context, compactIRI){
+  return R.has(getCompactIRIPrefix(compactIRI))(context);
+});
+
+// expandCompactIRI :: Object -> String -> String
+let expandCompactIRI = exports.expandCompactIRI = R.curry(function(context, compactIRI){
+  // https://www.w3.org/TR/json-ld/#compact-iris
+  // Prefixes are expanded when the form of the value is a compact IRI represented as a prefix:suffix combination, 
+  // the prefix matches a term defined within the active context, and the suffix does not begin with two slashes (//). 
+  // The compact IRI is expanded by concatenating the IRI mapped to the prefix to the (possibly empty) suffix. 
+  // If the prefix is not defined in the active context, or the suffix begins with two slashes (such as in 
+  // http://example.com), the value is interpreted as absolute IRI instead. If the prefix is an underscore (_), 
+  // the value is interpreted as blank node identifier instead.
+
+  // Because ':' appears to be a reserved token for IRIs (http://www.ietf.org/rfc/rfc3987.txt), this expansion
+  // function will enforce that there can be only 1 ':' character and that is used to separate prefix and suffix
+  
   return R.when(
-    a => {
-      return R.has(R.head(splitQName(a)), map);
-    },
-    a => {
-      let nameParts = splitQName(a);
-      return localName(R.prop(R.head(nameParts), map), R.join(':', R.tail(nameParts)));
-    },
-    name
-  );
+    canExpandCompactIRI(context),
+    a => R.concat(R.prop(getCompactIRIPrefix(a), context), getCompactIRISuffix(a))
+  )(compactIRI);
 });
 
 // s -> Promise [a]
