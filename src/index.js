@@ -1,35 +1,35 @@
-var R = require('ramda');
-var Q = require('q');
+const R = require('ramda');
+const P = require('bluebird');
 
 // first :: [a] -> a | Undefined
-let first = R.nth(0);
+const first = R.nth(0);
 
 // id :: Object -> String | Undefined
-let id = R.prop('@id');
+const id = R.prop('@id');
 
 // defaultToEmptyString :: String -> String
-let defaultToEmptyString = R.defaultTo('');
+const defaultToEmptyString = R.defaultTo('');
 
 // expandRelativeIRI :: String -> String -> String
-let expandRelativeIRI = exports.expandRelativeIRI = R.curry(function(namespace, name){
+const expandRelativeIRI = exports.expandRelativeIRI = R.curry(function(namespace, name){
   return R.concat(defaultToEmptyString(namespace), name);
 });
 
 // splitCompactIRI :: String -> [String]
-let splitCompactIRI = R.split(':');
+const splitCompactIRI = R.split(':');
 
 // getCompactIRIPrefix :: String -> String
-let getCompactIRIPrefix = exports.getCompactIRIPrefix = R.pipe(splitCompactIRI, first);
+const getCompactIRIPrefix = exports.getCompactIRIPrefix = R.pipe(splitCompactIRI, first);
 
 // getCompactIRISuffix :: String -> String
-let getCompactIRISuffix = exports.getCompactIRISuffix = R.pipe(splitCompactIRI, R.nth(1));
+const getCompactIRISuffix = exports.getCompactIRISuffix = R.pipe(splitCompactIRI, R.nth(1));
 
-let canExpandCompactIRI = exports.canExpandCompactIRI = R.curry(function(context, compactIRI){
+const canExpandCompactIRI = exports.canExpandCompactIRI = R.curry(function(context, compactIRI){
   return R.has(getCompactIRIPrefix(compactIRI))(context);
 });
 
 // expandCompactIRI :: Object -> String -> String
-let expandCompactIRI = exports.expandCompactIRI = R.curry(function(context, compactIRI){
+const expandCompactIRI = exports.expandCompactIRI = R.curry(function(context, compactIRI){
   // https://www.w3.org/TR/json-ld/#compact-iris
   // Prefixes are expanded when the form of the value is a compact IRI represented as a prefix:suffix combination, 
   // the prefix matches a term defined within the active context, and the suffix does not begin with two slashes (//). 
@@ -47,8 +47,11 @@ let expandCompactIRI = exports.expandCompactIRI = R.curry(function(context, comp
   )(compactIRI);
 });
 
+
+
+
 // s -> Promise [a]
-let getResource = function(uri){
+const getResource = function(uri){
   return Q($.getJSON(uri))
   .then(doc => {
     return jsonld.promises.expand(doc);
@@ -56,17 +59,17 @@ let getResource = function(uri){
 };
 
 // {s: [a]} -> s -> Promise [a]
-let localProperty = function(obj, p){
+const localProperty = function(obj, p){
   return Q.fcall(function(){ return R.prop(p()); });   
 };
 
 // {'@id': u, *} -> s -> Promise [a]
-let remoteProperty = function(obj, p){
+const remoteProperty = function(obj, p){
   return getResource(p());
 };
 
 // Object -> s -> Promise [Object] | Undefined
-let property = function(obj, property){
+const property = function(obj, property){
   // TODO: enable this resolver to be supplied via the property signature
   let defNsResolver = namespaceResolver('http://build-rest.net/vocab#');
   let p = R.when(R.complement(R.is(Function)), R.invoker(R.identity))(property);
