@@ -1,5 +1,8 @@
-var idx  = require('../src/index');
-var should = require('should');
+const idx  = require('../src/index');
+const should = require('should');
+const P = require('bluebird');
+const readFile = P.promisify(require('fs').readFile);
+const jsonld = require('jsonld');
 
 describe('index', ()=>{
   describe('#expandRelativeIRI', ()=>{
@@ -40,4 +43,48 @@ describe('index', ()=>{
       idx.getCompactIRISuffix('a:foo').should.eql('foo');
     });
   });
+
+  describe.only('#getContext', ()=>{
+    it('should resolve when context is embedded in the document', (done)=>{
+      const expectedContext = {
+        '@base': 'http://localhost',
+        '@vocab': 'http://build-rest.net/vocab#'
+      };
+
+      readFile('test-resources/index-inlined.ld-json', 'utf8')
+      .then(doc=>{
+        return JSON.parse(doc);
+      })
+      .then(doc=>{
+        return idx.getContext(doc);
+      })
+      .then(context=>{
+        context.should.eql(expectedContext);
+        done();
+      });
+    });
+    it('should resolve when context URL is embedded in the document');
+    it('should reosolve context URL');
+  });
+
+  describe.skip('Scenario: Inline Resource', ()=>{
+    it('should expand the document properly', ()=>{
+      readFile('test-resources/index-inlined.ld-json', 'utf8')
+      .then((doc)=>{
+        return jsonld.promises.expand(JSON.parse(doc));
+      })
+      .then(doc=>{
+        debugger;
+      });
+    });
+  });
 });
+
+
+
+
+/*
+  extract context so that client can specify shorthand path and full URLs can be easily resolved
+    inline context
+    external context
+*/

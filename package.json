@@ -21,6 +21,7 @@
   "homepage": "https://github.com/howarddierking/jsonld-browser-js#readme",
   "dependencies": {
     "bluebird": "^3.4.1",
+    "jsonld": "^0.4.11",
     "ramda": "^0.22.1",
     "request": "^2.74.0",
     "request-promise": "^4.1.1"

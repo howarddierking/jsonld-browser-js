@@ -1,0 +1,9 @@
+version: '2'
+services:
+  web:
+    image: nginx
+    volumes:
+      - ./fileserver.conf:/etc/nginx/nginx.conf:ro
+      - .:/resources:ro
+    ports:
+      - "80:80"

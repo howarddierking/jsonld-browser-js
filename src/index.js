@@ -24,6 +24,7 @@ const getCompactIRIPrefix = exports.getCompactIRIPrefix = R.pipe(splitCompactIRI
 // getCompactIRISuffix :: String -> String
 const getCompactIRISuffix = exports.getCompactIRISuffix = R.pipe(splitCompactIRI, R.nth(1));
 
+// canExpandCompactIRI :: Object -> String -> Boolean
 const canExpandCompactIRI = exports.canExpandCompactIRI = R.curry(function(context, compactIRI){
   return R.has(getCompactIRIPrefix(compactIRI))(context);
 });
@@ -46,6 +47,29 @@ const expandCompactIRI = exports.expandCompactIRI = R.curry(function(context, co
     a => R.concat(R.prop(getCompactIRIPrefix(a), context), getCompactIRISuffix(a))
   )(compactIRI);
 });
+
+
+
+
+
+
+const expandDoc = exports.expandDoc = function(doc){
+  // if promise, return doc.then((doc)=>json.ld.promises.expand(doc))
+  return jsonld.promises.expand(doc);
+};
+
+const getContext = exports.getContext = function(doc){
+  debugger;
+
+  // if doc is an object, look for @context
+
+    // if @context is an object then return it
+
+    // if @context is a link then dereference and return it
+
+};
+
+
 
 
 
